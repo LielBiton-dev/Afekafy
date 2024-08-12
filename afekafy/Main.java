@@ -12,7 +12,7 @@ public class Main {
         manage.connect();
 
         try (Scanner s = new Scanner(System.in)) {
-            int currentUserID = 4;  // No user is logged in at the start
+            int currentUserID = -1;  // No user is logged in at the start
             boolean exit = false;
 
             while (!exit) {
