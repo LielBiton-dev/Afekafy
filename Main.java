@@ -6,7 +6,7 @@ import java.util.Scanner;
 
 public class Main {
 	
-	private static int currentUserID = 4; 
+	private static int currentUserID = -1; 
 
     public static void main(String[] args) {
         Manage manage = new Manage();
