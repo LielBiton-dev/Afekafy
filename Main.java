@@ -129,6 +129,7 @@ public class Main {
                 }
                 else if (currentUserID != 1) {
                     manage.deleteUserAccount(currentUserID);
+                    currentUserID = -1;
                 }
                 else if (currentUserID == 1) {
                     manage.printUsers(currentUserID);
@@ -152,6 +153,7 @@ public class Main {
             case 12:
                 if (currentUserID != 1) {
                     manage.deleteUserAccount(currentUserID);
+                    currentUserID = -1;
                 }
                 break;
             case 13:
