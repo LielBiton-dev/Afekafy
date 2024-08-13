@@ -11,10 +11,10 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 public class DBConnection {
-
+	
 	// Database connection parameters
     static final String JDBC_DRIVER = "org.postgresql.Driver";
-    static final String DB_URL = "jdbc:postgresql://localhost:5432/afekafy";
+    static final String DB_URL = "jdbc:postgresql://localhost:5432/afekafy_2";
     static final String USER = "postgresuser";
     static final String PASS = "postgres";
     Connection conn = null;
@@ -66,7 +66,7 @@ public class DBConnection {
         }
     }
     
- // Method to execute a SQL query and return the results in a Map
+    // Method to execute a SQL query and return the results in a Map
     public Map<String, Object> executeMultipleQueries(String sqlQuery) {
     	Map<String, Object> resultMap = new LinkedHashMap<>();
         try {
@@ -119,4 +119,5 @@ public class DBConnection {
             }
         }
     }
+
 }

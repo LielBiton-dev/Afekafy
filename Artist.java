@@ -3,7 +3,7 @@ package afekafy;
 public class Artist extends User {
 	
 	public enum Genre {
-		POP, ROCK, COUNTRY, ELECTRONIC, JAZZ, BLUES, CLASSICAL,INDIE, METAL, PUNK, ALTERNATIVE, LATIN
+		POP, ROCK, COUNTRY, ELECTRONIC, JAZZ
 	};
 	protected int numOfSongs;
 	protected int numOfAlbums;
@@ -19,7 +19,11 @@ public class Artist extends User {
 	}
 	
 	public void setGenre(String genre_) {
-		genre = Genre.valueOf(genre_.toUpperCase());
+        try {
+        	genre = Genre.valueOf(genre_.toUpperCase());
+        } catch (IllegalArgumentException e) {
+            System.out.println("Invalid genre. Please enter a valid genre.");
+        }
 	}
 
 }
