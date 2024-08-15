@@ -18,16 +18,13 @@ public class DBConnection {
     static final String USER = "postgresuser";
     static final String PASS = "postgres";
     Connection conn = null;
-    //Statement stmt = null;
-    PreparedStatement pstmt = null;
     ResultSet rs = null;
     
     // Method to connect to the database
-    public void connect(){
+    public Connection connect(){
         try {
             Class.forName(JDBC_DRIVER);
             conn = DriverManager.getConnection(DB_URL, USER, PASS);
-            //stmt = conn.createStatement();
         } catch (SQLException ex) {
 			System.out.println("SQLException: " + ex.getMessage());
 			System.out.println("SQLState: " + ex.getSQLState());
@@ -35,13 +32,14 @@ public class DBConnection {
 		} catch (ClassNotFoundException ex) {
 			ex.printStackTrace();
 		}
+        
+        return conn;
     }
     
     // Method to close the database resources
     public void closeDBresources() {
         try {
             if (rs != null) rs.close();
-            //if (stmt != null) stmt.close();
             if (conn != null) conn.close();
         } catch (SQLException e) {
             e.printStackTrace();
@@ -56,7 +54,7 @@ public class DBConnection {
         }
         Statement stmt = null;
         try {
-            stmt = conn.createStatement(); // Create a new Statement for each query
+            stmt = conn.createStatement();
             return stmt.executeQuery(sqlQuery);
         } catch (SQLException ex) {
             System.out.println("SQLException: " + ex.getMessage());
@@ -102,8 +100,8 @@ public class DBConnection {
         }
         Statement stmt = null;
         try {
-            stmt = conn.createStatement(); // Create a new Statement for each query
-            return stmt.executeUpdate(sqlQuery); // Executes the SQL statement
+            stmt = conn.createStatement();
+            return stmt.executeUpdate(sqlQuery);
         } catch (SQLException ex) {
             System.out.println("SQLException: " + ex.getMessage());
             System.out.println("SQLState: " + ex.getSQLState());

@@ -7,31 +7,11 @@ import java.util.Scanner;
 
 public class Manage {
 	
-    // Database connection parameters
-    static final String JDBC_DRIVER = "org.postgresql.Driver";
-    static final String DB_URL = "jdbc:postgresql://localhost:5432/afekafy_2";
-    static final String USER = "postgresuser";
-    static final String PASS = "postgres";
     Connection conn = null;
     Statement stmt = null;
     PreparedStatement pstmt = null;
     ResultSet rs = null;
     DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-	
-    // Method to connect to the database
-    public void connect(){
-        try {
-            Class.forName(JDBC_DRIVER);
-            conn = DriverManager.getConnection(DB_URL, USER, PASS);
-            stmt = conn.createStatement();
-        } catch (SQLException ex) {
-			System.out.println("SQLException: " + ex.getMessage());
-			System.out.println("SQLState: " + ex.getSQLState());
-			System.out.println("VendorError: " + ex.getErrorCode());
-		} catch (ClassNotFoundException ex) {
-			ex.printStackTrace();
-		}
-    }
     
     public void closeDBresources() {
         try {
@@ -45,8 +25,6 @@ public class Manage {
     
     public void printUserDetails(int userId) {
         try {
-            Class.forName(JDBC_DRIVER);
-            conn = DriverManager.getConnection(DB_URL, USER, PASS);
             String sql = "SELECT * FROM user_table WHERE user_id = ?";
             pstmt = conn.prepareStatement(sql);
             pstmt.setInt(1, userId);
@@ -68,12 +46,11 @@ public class Manage {
             System.out.println("SQLException: " + ex.getMessage());
             System.out.println("SQLState: " + ex.getSQLState());
             System.out.println("VendorError: " + ex.getErrorCode());
-        } catch (ClassNotFoundException ex) {
-            ex.printStackTrace();
         }
     }
     
     public void printUsers(int userID) {
+
     	// Assuming admin is a userID 1
         if (userID != 1) {
             System.out.println("Access denied. Only admin users can print all users.");
@@ -81,8 +58,6 @@ public class Manage {
         }
         
         try {
-            Class.forName(JDBC_DRIVER);
-            conn = DriverManager.getConnection(DB_URL, USER, PASS);
             stmt = conn.createStatement();
             ResultSet rs = stmt.executeQuery("SELECT user_id FROM user_table");
             
@@ -101,13 +76,12 @@ public class Manage {
 			System.out.println("SQLException: " + ex.getMessage());
 			System.out.println("SQLState: " + ex.getSQLState());
 			System.out.println("VendorError: " + ex.getErrorCode());
-		} catch (ClassNotFoundException ex) {
-			ex.printStackTrace();
 		}
         
     }
     
     public void printArtists(int userID) {
+    	
         // Assuming admin is a userID 1
         if (userID != 1) {
             System.out.println("Access denied. Only admin users can print all artists.");
@@ -115,8 +89,6 @@ public class Manage {
         }
 
         try {
-            Class.forName(JDBC_DRIVER);
-            conn = DriverManager.getConnection(DB_URL, USER, PASS);
             String sql = "SELECT * FROM artist_table";
             pstmt = conn.prepareStatement(sql);
             ResultSet rs = pstmt.executeQuery();
@@ -144,8 +116,6 @@ public class Manage {
             System.out.println("SQLException: " + ex.getMessage());
             System.out.println("SQLState: " + ex.getSQLState());
             System.out.println("VendorError: " + ex.getErrorCode());
-        } catch (ClassNotFoundException ex) {
-            ex.printStackTrace();
         }
     }
     
@@ -184,9 +154,6 @@ public class Manage {
     public void insertUserIntoDatabase(User user) {
 
         try {
-            Class.forName(JDBC_DRIVER);
-            conn = DriverManager.getConnection(DB_URL, USER, PASS);
-
             // Create SQL insert statement
             String sql = "INSERT INTO user_table (first_name, last_name, email, birth_year, user_password, registration_date) " +
                          "VALUES (?, ?, ?, ?, ?, NOW())";
@@ -210,11 +177,7 @@ public class Manage {
 			System.out.println("SQLState: " + ex.getSQLState());
 			System.out.println("VendorError: " + ex.getErrorCode());
         	}
-		} catch (ClassNotFoundException ex) {
-			ex.printStackTrace();
-		}
-      
-
+		}    
     }
     
     public int userLogin(Scanner s) {
@@ -239,9 +202,6 @@ public class Manage {
     public int authenticateUser(String email, String password) {
     	int userID = -1;
         try {
-            Class.forName(JDBC_DRIVER);
-            conn = DriverManager.getConnection(DB_URL, USER, PASS);
-
             // Create SQL select statement and set the parameters
             pstmt = conn.prepareStatement("SELECT user_id, user_password FROM user_table WHERE email = ?");
             pstmt.setString(1, email);
@@ -261,17 +221,12 @@ public class Manage {
 			System.out.println("SQLException: " + ex.getMessage());
 			System.out.println("SQLState: " + ex.getSQLState());
 			System.out.println("VendorError: " + ex.getErrorCode());
-		} catch (ClassNotFoundException ex) {
-			ex.printStackTrace();
 		}
-        return userID; // Return false if user not found or any exception occurs
+        return userID; // Returns false if user is not found or any exception occurs
     }
     
     public void deleteUserAccount(int userID) {
     	try {
-            Class.forName(JDBC_DRIVER);
-            conn = DriverManager.getConnection(DB_URL, USER, PASS);
-
             // Set the parameters
             pstmt = conn.prepareStatement("DELETE FROM user_table WHERE user_id = ?");
             pstmt.setInt(1, userID);
@@ -286,22 +241,12 @@ public class Manage {
 			System.out.println("SQLException: " + ex.getMessage());
 			System.out.println("SQLState: " + ex.getSQLState());
 			System.out.println("VendorError: " + ex.getErrorCode());
-		} catch (ClassNotFoundException ex) {
-			ex.printStackTrace();
 		}
 
     }
     
     public void becomeAnArtist(int userId, Scanner s) {
-
-        // Ask for the additional traits required for an artist
-        System.out.print("Enter the number of songs you have: ");
-        int numOfSongs = s.nextInt();
-        s.nextLine();
-
-        System.out.print("Enter the number of albums you have: ");
-        int numOfAlbums = s.nextInt();
-        s.nextLine();
+    	int numOfAlbums = 0, numOfSongs = 0;
 
         System.out.print("Enter a short bio: ");
         String bio = s.nextLine();
@@ -310,22 +255,8 @@ public class Manage {
         String genre;
         System.out.print("Enter your genre (POP, ROCK, COUNTRY, ELECTRONIC, JAZZ): ");
         genre = s.nextLine();
-        
-        //while (true) {
-        //    System.out.print("Enter your genre (POP, ROCK, COUNTRY, ELECTRONIC, JAZZ): ");
-        //    genre = s.nextLine();
-        //    try {
-        //        new Artist("test","test", "test@example.test", 1999, "test", numOfSongs, numOfAlbums, bio, genre);
-         //       break; // If no exception, genre is valid
-         //   } catch (IllegalArgumentException e) {
-         //       System.out.println("Invalid Genre"); // Invalid genre, prompt again
-         //   }
-        //}
 
-        try {
-            Class.forName(JDBC_DRIVER);
-            conn = DriverManager.getConnection(DB_URL, USER, PASS);
-            
+        try {        
             String sql = "INSERT INTO artist_table (artist_id, artist_genre, num_of_songs, num_of_albums, bio) "
             		+ "VALUES (?, ?::genre, ?, ?, ?)";
             pstmt = conn.prepareStatement(sql);
@@ -343,12 +274,13 @@ public class Manage {
         	
         	if (ex.getSQLState().equals("22P02")) {
         		System.out.println("Invalid genre\n");
-        	}
+        	} else if (ex.getSQLState().equals("23505")) {
+        		System.out.println("Your are already an artist!\n");
+        	} else {
 			System.out.println("SQLException: " + ex.getMessage());
 			System.out.println("SQLState: " + ex.getSQLState());
 			System.out.println("VendorError: " + ex.getErrorCode());
-		} catch (ClassNotFoundException ex) {
-			ex.printStackTrace();
+        	}
 		}
     }
     
@@ -373,8 +305,6 @@ public class Manage {
     
     public boolean isValidAlbumChoice(int albumID, int artistID) {
         try {
-            Class.forName(JDBC_DRIVER);
-            conn = DriverManager.getConnection(DB_URL, USER, PASS);
             
             String sql = "SELECT COUNT(*) FROM album_table WHERE album_id = ? AND artist_id = ?";
             pstmt = conn.prepareStatement(sql);
@@ -389,8 +319,6 @@ public class Manage {
 			System.out.println("SQLException: " + ex.getMessage());
 			System.out.println("SQLState: " + ex.getSQLState());
 			System.out.println("VendorError: " + ex.getErrorCode());
-		} catch (ClassNotFoundException ex) {
-			ex.printStackTrace();
 		}
         return false;
     }
@@ -426,17 +354,11 @@ public class Manage {
             addSong(newSong, artistID, albumID);
         }
 
-        //System.out.println(numberOfSongs + " songs have been added to album with ID: " + albumID);
-        // we can use this print only if we count the successful song inserts. (changing addSong function to int type for better indication).
-        
     }
     
     public void addSong(Song song, int artistID, int albumId) {
 
-        try {
-            Class.forName(JDBC_DRIVER);
-            conn = DriverManager.getConnection(DB_URL, USER, PASS);
-            
+        try {    
             // Create SQL insert statement
             String sql = "INSERT INTO song_table (song_name, duration, song_genre, replays, song_release_year, artist_id, album_id) "
             		+ "VALUES (?, ?, ?::genre, ?, ?, ?, ?)";
@@ -456,8 +378,9 @@ public class Manage {
             }
             
             // Execute the insert
-            pstmt.executeUpdate();
-            System.out.println("Song added successfully!");
+            pstmt.executeUpdate();          
+            System.out.println("Song added successfully!");      
+            updateArtistNOfSongs(artistID);
 
         } catch (SQLException ex) {
         	if (ex.getSQLState().equals("22P02")) {
@@ -469,16 +392,54 @@ public class Manage {
 			System.out.println("SQLState: " + ex.getSQLState());
 			System.out.println("VendorError: " + ex.getErrorCode());
         	}
-		} catch (ClassNotFoundException ex) {
-			ex.printStackTrace();
 		}
+    }
+    
+    public void updateArtistNOfSongs(int artistId) {
+    	
+    	String query = "UPDATE artist_table SET num_of_songs = num_of_songs + 1 WHERE artist_id = ?;";
+    	
+    	try {
+    		pstmt = conn.prepareStatement(query);
+    		pstmt.setInt(1, artistId);
+    		
+    		int rowsAffected = pstmt.executeUpdate();
+    		if (rowsAffected <= 0) {
+    			System.out.println("Couldn't update artist's amount of songs");
+    		}
+    		
+    	} catch (SQLException ex) {
+			System.out.println("SQLException: " + ex.getMessage());
+			System.out.println("SQLState: " + ex.getSQLState());
+			System.out.println("VendorError: " + ex.getErrorCode());
+        }
+    	
+    }
+    
+    public void updateArtistNOfAlbums(int artistId) {
+    	
+    	String query = "UPDATE artist_table SET num_of_albums = num_of_albums + 1 WHERE artist_id = ?;";
+    	
+    	try {
+    		pstmt = conn.prepareStatement(query);
+    		pstmt.setInt(1, artistId);
+    		
+    		int rowsAffected = pstmt.executeUpdate();
+    		if (rowsAffected <= 0) {
+    			System.out.println("Couldn't update artist's amount of albums");
+    		}
+    		
+    	} catch (SQLException ex) {
+			System.out.println("SQLException: " + ex.getMessage());
+			System.out.println("SQLState: " + ex.getSQLState());
+			System.out.println("VendorError: " + ex.getErrorCode());
+        }
+    	
     }
     
     public boolean isArtist(int userId) {
         
         try {
-            Class.forName(JDBC_DRIVER);
-            conn = DriverManager.getConnection(DB_URL, USER, PASS);
             
             pstmt = conn.prepareStatement("SELECT COUNT(*) FROM artist_table WHERE artist_id = ?");
             pstmt.setInt(1, userId);
@@ -492,16 +453,14 @@ public class Manage {
 			System.out.println("SQLException: " + ex.getMessage());
 			System.out.println("SQLState: " + ex.getSQLState());
 			System.out.println("VendorError: " + ex.getErrorCode());
-		} catch (ClassNotFoundException ex) {
-			ex.printStackTrace();
 		}
         return false;
     }
     
-    public void addNewAlbum(int userId, Scanner s) {
+    public boolean addNewAlbum(int userId, Scanner s) {
         if (!isArtist(userId)) {
             System.out.println("Only artists can add albums.");
-            return;
+            return false;
         }
 
         System.out.print("Enter album title: ");
@@ -518,8 +477,6 @@ public class Manage {
         Album newAlbum = new Album(albumTitle, albumReleaseYear, albumGenre);
 
         try {
-            Class.forName(JDBC_DRIVER);
-            conn = DriverManager.getConnection(DB_URL, USER, PASS);
             
             String sql = "INSERT INTO album_table (album_name, album_genre, album_release_year, artist_id) "
             		+ "VALUES (?, ?::genre, ?, ?)";
@@ -532,14 +489,21 @@ public class Manage {
 
             pstmt.executeUpdate();
             System.out.println("Album added successfully!");
+            updateArtistNOfAlbums(userId);
+            return true;
 
         } catch (SQLException ex) {
+        	if (ex.getSQLState().equals("22P02")) {
+        		System.out.println("Invalid genre\n");
+        	} else if (ex.getSQLState().equals("23514")){
+        		System.out.println("Invalid year\n");
+        	} else {
 			System.out.println("SQLException: " + ex.getMessage());
 			System.out.println("SQLState: " + ex.getSQLState());
 			System.out.println("VendorError: " + ex.getErrorCode());
-		} catch (ClassNotFoundException ex) {
-			ex.printStackTrace();
+        	}
 		}
+        return false;
     }
 
     public void deleteAlbum(int userId, Scanner s) {
@@ -552,8 +516,6 @@ public class Manage {
         int albumId = s.nextInt();
 
         try {
-            Class.forName(JDBC_DRIVER);
-            conn = DriverManager.getConnection(DB_URL, USER, PASS);
             
         	String sql = "DELETE FROM album_table WHERE album_id = ? AND artist_id = ?";
         	pstmt = conn.prepareStatement(sql);
@@ -571,8 +533,6 @@ public class Manage {
 			System.out.println("SQLException: " + ex.getMessage());
 			System.out.println("SQLState: " + ex.getSQLState());
 			System.out.println("VendorError: " + ex.getErrorCode());
-		} catch (ClassNotFoundException ex) {
-			ex.printStackTrace();
 		}
     }
     
@@ -583,8 +543,6 @@ public class Manage {
         }
 
         try {
-            Class.forName(JDBC_DRIVER);
-            conn = DriverManager.getConnection(DB_URL, USER, PASS);
             
             String sql = "SELECT * FROM album_table WHERE artist_id = ?";
             pstmt = conn.prepareStatement(sql); 
@@ -606,30 +564,22 @@ public class Manage {
 			System.out.println("SQLException: " + ex.getMessage());
 			System.out.println("SQLState: " + ex.getSQLState());
 			System.out.println("VendorError: " + ex.getErrorCode());
-		} catch (ClassNotFoundException ex) {
-			ex.printStackTrace();
 		}
     }
     
     public void updateReplays(int songId) {
 
         try {
-        	
-            Class.forName(JDBC_DRIVER);
-            conn = DriverManager.getConnection(DB_URL, USER, PASS);
             
             String sql = "UPDATE song_table SET replays = replays + 1 WHERE song_id = ?";
             pstmt = conn.prepareStatement(sql); 
             pstmt.setInt(1, songId);
             pstmt.executeUpdate();
-            System.out.println("Replays updated successfully!");
 
         } catch (SQLException ex) {
 			System.out.println("SQLException: " + ex.getMessage());
 			System.out.println("SQLState: " + ex.getSQLState());
 			System.out.println("VendorError: " + ex.getErrorCode());
-		} catch (ClassNotFoundException ex) {
-			ex.printStackTrace();
 		}
     }
     
@@ -639,9 +589,6 @@ public class Manage {
 
         // Add to user_song table
         try {
-        	
-            Class.forName(JDBC_DRIVER);
-            conn = DriverManager.getConnection(DB_URL, USER, PASS);
             
             String sql = "INSERT INTO user_song (user_id, song_id, play_date) VALUES (?, ?, NOW())";
             pstmt = conn.prepareStatement(sql);
@@ -655,16 +602,12 @@ public class Manage {
 			System.out.println("SQLException: " + ex.getMessage());
 			System.out.println("SQLState: " + ex.getSQLState());
 			System.out.println("VendorError: " + ex.getErrorCode());
-		} catch (ClassNotFoundException ex) {
-			ex.printStackTrace();
 		}
     }
     
     public void printAllSongs() {
     	
         try {
-        	Class.forName(JDBC_DRIVER);
-            conn = DriverManager.getConnection(DB_URL, USER, PASS);
             pstmt = conn.prepareStatement("SELECT * FROM song_table");
             
             System.out.println("Songs:");
@@ -689,16 +632,13 @@ public class Manage {
 			System.out.println("SQLException: " + ex.getMessage());
 			System.out.println("SQLState: " + ex.getSQLState());
 			System.out.println("VendorError: " + ex.getErrorCode());
-		} catch (ClassNotFoundException ex) {
-			ex.printStackTrace();
 		}
     }
     
     public void deleteSong(int songId, int userId) {
 
         try {
-        	Class.forName(JDBC_DRIVER);
-            conn = DriverManager.getConnection(DB_URL, USER, PASS);
+
             String sql = "DELETE FROM song_table WHERE song_id = ? AND artist_id = ?";
             pstmt = conn.prepareStatement(sql);
 
@@ -716,16 +656,13 @@ public class Manage {
 			System.out.println("SQLException: " + ex.getMessage());
 			System.out.println("SQLState: " + ex.getSQLState());
 			System.out.println("VendorError: " + ex.getErrorCode());
-		} catch (ClassNotFoundException ex) {
-			ex.printStackTrace();
 		}
     }
     
     public boolean searchSongs(String query) {
         boolean found = false;
         try {
-            Class.forName(JDBC_DRIVER);
-            conn = DriverManager.getConnection(DB_URL, USER, PASS);
+
             String sql = "SELECT * FROM song_table WHERE song_name ILIKE ?";
             pstmt = conn.prepareStatement(sql);
 
@@ -755,8 +692,6 @@ public class Manage {
             System.out.println("SQLException: " + ex.getMessage());
             System.out.println("SQLState: " + ex.getSQLState());
             System.out.println("VendorError: " + ex.getErrorCode());
-        } catch (ClassNotFoundException ex) {
-            ex.printStackTrace();
         }
         return found;
     }
@@ -802,11 +737,10 @@ public class Manage {
         int creationYear = Year.now().getValue();
 
         System.out.print("Enter playlist permission (PUBLIC/PRIVATE): ");
-        String permission = s.nextLine(); //add valid check
+        String permission = s.nextLine(); 
 
         try {
-            Class.forName(JDBC_DRIVER);
-            conn = DriverManager.getConnection(DB_URL, USER, PASS);
+
             String sql = "INSERT INTO playlist_table (playlist_name, creation_year, permissions, user_id) "
             		+ "VALUES (?, ?, ?::permission, ?)";
             pstmt = conn.prepareStatement(sql);
@@ -830,16 +764,12 @@ public class Manage {
             System.out.println("SQLState: " + ex.getSQLState());
             System.out.println("VendorError: " + ex.getErrorCode());
         	}
-        } catch (ClassNotFoundException ex) {
-            ex.printStackTrace();
         }
         return false;
     }
     
     public void updatePlaylist(int playlistId, int songId, boolean add) {
         try {
-            Class.forName(JDBC_DRIVER);
-            conn = DriverManager.getConnection(DB_URL, USER, PASS);
 
             if (add) {
                 // Add song to playlist
@@ -855,23 +785,25 @@ public class Manage {
                 pstmt = conn.prepareStatement(sql);
                 pstmt.setInt(1, songId);
                 pstmt.setInt(2, playlistId);
-                pstmt.executeUpdate();
-                System.out.println("Song removed from playlist successfully!");
+                int rows_effected = pstmt.executeUpdate();
+                if (rows_effected > 0) {
+                	System.out.println("Song removed from playlist successfully!");
+                }
+                else {
+                	System.out.println("This song does not exists in this playlist");
+                }
             }
 
         } catch (SQLException ex) {
             System.out.println("SQLException: " + ex.getMessage());
             System.out.println("SQLState: " + ex.getSQLState());
             System.out.println("VendorError: " + ex.getErrorCode());
-        } catch (ClassNotFoundException ex) {
-            ex.printStackTrace();
         }
     }
     
     public void printUserPlaylists(int userId) {
         try {
-            Class.forName(JDBC_DRIVER);
-            conn = DriverManager.getConnection(DB_URL, USER, PASS);
+
             String sql = "SELECT * FROM playlist_table WHERE user_id = ?";
             pstmt = conn.prepareStatement(sql);
             pstmt.setInt(1, userId);
@@ -895,8 +827,6 @@ public class Manage {
             System.out.println("SQLException: " + ex.getMessage());
             System.out.println("SQLState: " + ex.getSQLState());
             System.out.println("VendorError: " + ex.getErrorCode());
-        } catch (ClassNotFoundException ex) {
-            ex.printStackTrace();
         }
     }
     
@@ -918,8 +848,7 @@ public class Manage {
     
     public boolean playlistExistsAndBelongsToUser(int playlistId, int userId) {
         try {
-            Class.forName(JDBC_DRIVER);
-            conn = DriverManager.getConnection(DB_URL, USER, PASS);
+
             String sql = "SELECT 1 FROM playlist_table WHERE playlist_id = ? AND user_id = ?";
             pstmt = conn.prepareStatement(sql);
             pstmt.setInt(1, playlistId);
@@ -928,7 +857,23 @@ public class Manage {
 
             return rs.next();
             
-        } catch (SQLException | ClassNotFoundException ex) {
+        } catch (SQLException ex) {
+            System.out.println("Error: " + ex.getMessage());
+            return false;
+        }
+    }
+    
+    public boolean playlistHasSongs(int playlistId) {
+        try {
+
+            String sql = "SELECT 1 FROM song_playlist WHERE playlist_id = ?";
+            pstmt = conn.prepareStatement(sql);
+            pstmt.setInt(1, playlistId);
+            ResultSet rs = pstmt.executeQuery();
+
+            return rs.next();
+
+        } catch (SQLException ex) {
             System.out.println("Error: " + ex.getMessage());
             return false;
         }
@@ -937,8 +882,7 @@ public class Manage {
     public void deletePlaylist(int userId, Scanner s) {
 
         try {
-            Class.forName(JDBC_DRIVER);
-            conn = DriverManager.getConnection(DB_URL, USER, PASS);
+
             printUserPlaylists(userId);
             System.out.print("Enter the ID of the playlist you want to delete: ");
             int playlistIdToDelete = s.nextInt();
@@ -949,32 +893,24 @@ public class Manage {
             pstmt = conn.prepareStatement(deletePlaylistSQL);
             pstmt.setInt(1, playlistIdToDelete);
             pstmt.setInt(2, userId);
-            /*int rowsAffected = pstmt.executeUpdate();
+            int rowsAffected = pstmt.executeUpdate();
 
             if (rowsAffected > 0) {
                 System.out.println("Playlist deleted successfully!");
-                // Also delete from song_playlist table
-                String deleteSongsSQL = "DELETE FROM song_playlist WHERE playlist_id = ?";
-                pstmt = conn.prepareStatement(deleteSongsSQL);
-                pstmt.setInt(1, playlistIdToDelete);
-                pstmt.executeUpdate();
             } else {
                 System.out.println("Failed to delete playlist. Make sure you own the playlist and it exists.");
-            }*/
+            }
 
         } catch (SQLException ex) {
             System.out.println("SQLException: " + ex.getMessage());
             System.out.println("SQLState: " + ex.getSQLState());
             System.out.println("VendorError: " + ex.getErrorCode());
-        } catch (ClassNotFoundException ex) {
-            ex.printStackTrace();
         }
     }
     
     public void printSongsInPlaylist(int playlistId) {
         try {
-            Class.forName(JDBC_DRIVER);
-            conn = DriverManager.getConnection(DB_URL, USER, PASS);
+
             String sql = "SELECT s.song_id, s.song_name, s.duration, s.song_genre, s.replays, s.song_release_year " +
                          "FROM song_table s " +
                          "JOIN song_playlist sp ON s.song_id = sp.song_id " +
@@ -1003,8 +939,6 @@ public class Manage {
             System.out.println("SQLException: " + ex.getMessage());
             System.out.println("SQLState: " + ex.getSQLState());
             System.out.println("VendorError: " + ex.getErrorCode());
-        } catch (ClassNotFoundException ex) {
-            ex.printStackTrace();
         }
     }
        
@@ -1015,9 +949,15 @@ public class Manage {
         int playlistId = s.nextInt();
         s.nextLine();
 
-        // Check if the playlist exists and belongs to the user
+        // Checks if the playlist exists and belongs to the user
         if (!playlistExistsAndBelongsToUser(playlistId, userId)) {
-            System.out.println("Invalid playlist ID or you do not own this playlist.");
+            System.out.println("Invalid playlist ID or you do not own this playlist");
+            return;
+        }
+        
+        // Checks if the playlist has any songs for deletion
+        if (!playlistHasSongs(playlistId)) {
+        	System.out.println("This playlist has no songs");
             return;
         }
 
@@ -1049,8 +989,6 @@ public class Manage {
         }
 
         try {
-            Class.forName(JDBC_DRIVER);
-            conn = DriverManager.getConnection(DB_URL, USER, PASS);
 
             // Check if the user has already written a review
             String checkReviewSQL = "SELECT COUNT(*) FROM app_review_table WHERE user_id = ?";
@@ -1078,8 +1016,6 @@ public class Manage {
             System.out.println("SQLException: " + ex.getMessage());
             System.out.println("SQLState: " + ex.getSQLState());
             System.out.println("VendorError: " + ex.getErrorCode());
-        } catch (ClassNotFoundException ex) {
-            ex.printStackTrace();
         }
     }
     
@@ -1090,8 +1026,7 @@ public class Manage {
         }
 
         try {
-            Class.forName(JDBC_DRIVER);
-            conn = DriverManager.getConnection(DB_URL, USER, PASS);
+
             String sql = "SELECT * FROM app_review_table ORDER BY app_rating ASC";
             pstmt = conn.prepareStatement(sql);
             ResultSet rs = pstmt.executeQuery();
@@ -1117,8 +1052,6 @@ public class Manage {
             System.out.println("SQLException: " + ex.getMessage());
             System.out.println("SQLState: " + ex.getSQLState());
             System.out.println("VendorError: " + ex.getErrorCode());
-        } catch (ClassNotFoundException ex) {
-            ex.printStackTrace();
         }
     }
     
@@ -1128,8 +1061,6 @@ public class Manage {
         String searchString = s.nextLine();
 
         try {
-            Class.forName(JDBC_DRIVER);
-            conn = DriverManager.getConnection(DB_URL, USER, PASS);
             
             String query = "SELECT * FROM ("
                     + "SELECT song_name AS name, song_id AS id, 'song' AS type FROM song_table "
@@ -1165,8 +1096,6 @@ public class Manage {
             System.out.println("SQLException: " + ex.getMessage());
             System.out.println("SQLState: " + ex.getSQLState());
             System.out.println("VendorError: " + ex.getErrorCode());
-        } catch (ClassNotFoundException ex) {
-            ex.printStackTrace();
         }
     }
       

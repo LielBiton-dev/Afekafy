@@ -11,10 +11,10 @@ public class Main {
     public static void main(String[] args) {
         Manage manage = new Manage();
         Site site = new Site();
-        manage.connect();
+        DBConnection db = new DBConnection();
+        manage.conn = db.connect();
 
         try (Scanner s = new Scanner(System.in)) {
-            //int currentUserID = -1;  // No user is logged in at the start
             boolean exit = false;
 
             while (!exit) {
@@ -32,7 +32,7 @@ public class Main {
         } catch (Exception e) {
             System.out.println("An error occurred: " + e.getMessage());
         } finally {
-            manage.closeDBresources();
+        	manage.closeDBresources();
         }
         System.out.println("Thank you for using Afekafy!");
     }
@@ -143,8 +143,9 @@ public class Main {
                 break;
             case 10:
                 if (manage.isArtist(currentUserID)) {
-                	manage.addNewAlbum(currentUserID, s);
-                	manage.printArtistAlbums(currentUserID);
+                	if (manage.addNewAlbum(currentUserID, s)) {
+                		manage.printArtistAlbums(currentUserID);
+                	}
                 }
                 else
                 	return true;
