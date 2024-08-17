@@ -90,7 +90,7 @@ public class Main {
         
         if (currentUserID == 1) {
             System.out.println("\nAdmin Options:");
-            System.out.println(nextOption++ + ". Print All Users");
+            System.out.println(nextOption++ + ". Print All users, artists and site reviews");
         }
 
         System.out.println(nextOption + ". Exit");

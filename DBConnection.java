@@ -2,7 +2,6 @@ package afekafy;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
-import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -14,7 +13,7 @@ public class DBConnection {
 	
 	// Database connection parameters
     static final String JDBC_DRIVER = "org.postgresql.Driver";
-    static final String DB_URL = "jdbc:postgresql://localhost:5432/afekafy_2";
+    static final String DB_URL = "jdbc:postgresql://localhost:5432/afekafy";
     static final String USER = "postgresuser";
     static final String PASS = "postgres";
     Connection conn = null;

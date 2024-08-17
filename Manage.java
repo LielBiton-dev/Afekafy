@@ -3,6 +3,8 @@ import java.sql.*;
 import java.time.LocalDate;
 import java.time.Year;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Scanner;
 
 public class Manage {
@@ -111,6 +113,8 @@ public class Manage {
                 System.out.printf("%-5s %-12s %-12d %-12d %-10s", "",genre, numOfSongs, numOfAlbums, bio);
                 System.out.println();
             }
+            
+            System.out.println();
 
         } catch (SQLException ex) {
             System.out.println("SQLException: " + ex.getMessage());
@@ -149,6 +153,7 @@ public class Manage {
 
         // Insert the new user into the database
         insertUserIntoDatabase(newUser);
+        System.out.print("\n");
     }
     
     public void insertUserIntoDatabase(User user) {
@@ -194,7 +199,7 @@ public class Manage {
         if (userID != -1) {
             System.out.println("User authenticated successfully.");
         } else {
-            System.out.println("Invalid email or password. Try again");
+            System.out.println("Invalid email or password. Try again\n");
         }
         return userID;
     }
@@ -233,9 +238,9 @@ public class Manage {
 
             int affectedRows = pstmt.executeUpdate();
             if (affectedRows > 0) {
-                System.out.println("User deleted successfully.");
+                System.out.println("User deleted successfully\n");
             } else {
-                System.out.println("Failed to delete user. User ID may not exist.");
+                System.out.println("Failed to delete user. User ID may not exist\n");
             }
         } catch (SQLException ex) {
 			System.out.println("SQLException: " + ex.getMessage());
@@ -347,38 +352,41 @@ public class Manage {
         System.out.print("How many songs do you want to add to this album? ");
         int numberOfSongs = s.nextInt();
         s.nextLine();
+        
+        System.out.println("");
 
         for (int i = 0; i < numberOfSongs; i++) {
             System.out.println("Adding song " + (i + 1) + " of " + numberOfSongs + ":");
             Song newSong = getSongDetails(s);
             addSong(newSong, artistID, albumID);
+            System.out.println("");
         }
 
     }
     
     public void addSong(Song song, int artistID, int albumId) {
 
-        try {    
+        try {     	       	
             // Create SQL insert statement
-            String sql = "INSERT INTO song_table (song_name, duration, song_genre, replays, song_release_year, artist_id, album_id) "
-            		+ "VALUES (?, ?, ?::genre, ?, ?, ?, ?)";
+            String sql = "INSERT INTO song_table (song_name, duration, song_genre, song_release_year, artist_id, album_id) "
+            		+ "VALUES (?, ?, ?::genre, ?, ?, ?)";
             pstmt = conn.prepareStatement(sql);
+            
             // Set the parameters
             pstmt.setString(1, song.songTitle);
             pstmt.setInt(2, song.timeInSec);
             pstmt.setString(3, song.genre.toString().substring(0, 1).toUpperCase() + song.genre.toString().substring(1).toLowerCase());
-            pstmt.setInt(4, song.replays);
-            pstmt.setInt(5, song.releasedYear);
-            pstmt.setInt(6, artistID);
+            pstmt.setInt(4, song.releasedYear);
+            pstmt.setInt(5, artistID);           
             
             if (albumId != 0) {
-                pstmt.setInt(7, albumId);
+                pstmt.setInt(6, albumId);
             } else {
-                pstmt.setNull(7, java.sql.Types.INTEGER);
+                pstmt.setNull(6, java.sql.Types.INTEGER);
             }
             
             // Execute the insert
-            pstmt.executeUpdate();          
+            pstmt.executeUpdate();    
             System.out.println("Song added successfully!");      
             updateArtistNOfSongs(artistID);
 
@@ -567,25 +575,7 @@ public class Manage {
 		}
     }
     
-    public void updateReplays(int songId) {
-
-        try {
-            
-            String sql = "UPDATE song_table SET replays = replays + 1 WHERE song_id = ?";
-            pstmt = conn.prepareStatement(sql); 
-            pstmt.setInt(1, songId);
-            pstmt.executeUpdate();
-
-        } catch (SQLException ex) {
-			System.out.println("SQLException: " + ex.getMessage());
-			System.out.println("SQLState: " + ex.getSQLState());
-			System.out.println("VendorError: " + ex.getErrorCode());
-		}
-    }
-    
     public void playSong(int songId, int userId) {
-        // Increase replays
-        updateReplays(songId);
 
         // Add to user_song table
         try {
@@ -612,17 +602,16 @@ public class Manage {
             
             System.out.println("Songs:");
             System.out.println("=".repeat(110));
-            System.out.printf("%-10s %-30s %-10s %-15s %-10s %-10s %-10s %-10s%n", 
-                              "ID", "Title", "Duration", "Genre", "Replays", "Year", "Artist ID", "Album ID");
+            System.out.printf("%-10s %-30s %-10s %-15s %-10s %-10s %-10s%n", 
+                              "ID", "Title", "Duration", "Genre", "Year", "Artist ID", "Album ID");
             System.out.println("=".repeat(110));
 
             while (rs.next()) {         	
-                System.out.printf("%-10d %-30s %-10d %-15s %-10d %-10d %-10d %-10d%n", 
+                System.out.printf("%-10d %-30s %-10d %-15s %-10d %-10d %-10d%n", 
                         rs.getInt("song_id"), 
                         rs.getString("song_name"), 
                         rs.getInt("duration"), 
                         rs.getString("song_genre"), 
-                        rs.getInt("replays"), 
                         rs.getInt("song_release_year"), 
                         rs.getInt("artist_id"), 
                         rs.getInt("album_id"));
@@ -659,8 +648,8 @@ public class Manage {
 		}
     }
     
-    public boolean searchSongs(String query) {
-        boolean found = false;
+    public List<Integer> searchSongs(String query) {
+    	List<Integer> songsList = new ArrayList<>();
         try {
 
             String sql = "SELECT * FROM song_table WHERE song_name ILIKE ?";
@@ -670,19 +659,19 @@ public class Manage {
             ResultSet rs = pstmt.executeQuery();
 
             System.out.println("Songs:");
-            System.out.println("=".repeat(110));
-            System.out.printf("%-10s %-30s %-10s %-15s %-10s %-10s %-10s %-10s%n", 
-                              "ID", "Title", "Duration", "Genre", "Replays", "Year", "Artist ID", "Album ID");
-            System.out.println("=".repeat(110));
+            System.out.println("=".repeat(105));
+            System.out.printf("%-10s %-30s %-10s %-15s %-10s %-10s %-10s%n", 
+                              "ID", "Title", "Duration", "Genre", "Year", "Artist ID", "Album ID");
+            System.out.println("=".repeat(105));
 
             while (rs.next()) {
-            	found = true;
-                System.out.printf("%-10d %-30s %-10d %-15s %-10d %-10d %-10d %-10d%n", 
+            	int songId = rs.getInt("song_id");
+                songsList.add(songId);
+                System.out.printf("%-10d %-30s %-10d %-15s %-10d %-10d %-10d%n", 
                         rs.getInt("song_id"), 
                         rs.getString("song_name"), 
                         rs.getInt("duration"), 
                         rs.getString("song_genre"), 
-                        rs.getInt("replays"), 
                         rs.getInt("song_release_year"), 
                         rs.getInt("artist_id"), 
                         rs.getInt("album_id"));
@@ -693,26 +682,36 @@ public class Manage {
             System.out.println("SQLState: " + ex.getSQLState());
             System.out.println("VendorError: " + ex.getErrorCode());
         }
-        return found;
+        return songsList;
     }
     
     public void searchAndActOnSong(int userId, Scanner s) {
         System.out.print("Enter song name to search: ");
         String query = s.nextLine();
-        if (!searchSongs(query)) {
-        	System.out.println("No songs found matching the query: " + query);
+        List<Integer> songsArray = searchSongs(query);
+        
+        if (songsArray.isEmpty()) {
+        	System.out.println("No songs found matching the query: " + query + "\n");
         	return;
         }
 
-        System.out.print("\nChoose a song by ID number: ");
+        System.out.print("Choose a song by ID number: ");
         int choice = s.nextInt();
 
+        while (!songsArray.contains(choice)) {
+        	System.out.print("This is not a valid choice, try again: ");
+            choice = s.nextInt();
+        }
+        System.out.println("");
+        System.out.println("Choose one of the next actions: ");
         System.out.println("1: Play song");
         System.out.println("2: Delete song (if you are the artist)");
         System.out.println("3: Add song to a playlist");
         System.out.print("Choose an action: ");
         int action = s.nextInt();
         s.nextLine();
+        
+        
 
         switch (action) {
             case 1:
@@ -801,7 +800,8 @@ public class Manage {
         }
     }
     
-    public void printUserPlaylists(int userId) {
+    public boolean printUserPlaylists(int userId) {
+    	boolean exists = false;
         try {
 
             String sql = "SELECT * FROM playlist_table WHERE user_id = ?";
@@ -816,18 +816,22 @@ public class Manage {
             System.out.println("=".repeat(60));
 
             while (rs.next()) {
+            	exists = true;
                 System.out.printf("%-10d %-20s %-10d %-15s%n", 
                         rs.getInt("playlist_id"), 
                         rs.getString("playlist_name"), 
                         rs.getInt("creation_year"), 
                         rs.getString("permissions"));
           }
+          
 
         } catch (SQLException ex) {
             System.out.println("SQLException: " + ex.getMessage());
             System.out.println("SQLState: " + ex.getSQLState());
             System.out.println("VendorError: " + ex.getErrorCode());
         }
+        
+        return exists;
     }
     
     public void choosePlaylistAndAddSong(int songId, int userId, Scanner s) {
@@ -883,7 +887,10 @@ public class Manage {
 
         try {
 
-            printUserPlaylists(userId);
+            if (!printUserPlaylists(userId)) {
+            	System.out.print("You have no playlists\n");
+            	return;
+            }
             System.out.print("Enter the ID of the playlist you want to delete: ");
             int playlistIdToDelete = s.nextInt();
             s.nextLine();
@@ -911,7 +918,7 @@ public class Manage {
     public void printSongsInPlaylist(int playlistId) {
         try {
 
-            String sql = "SELECT s.song_id, s.song_name, s.duration, s.song_genre, s.replays, s.song_release_year " +
+            String sql = "SELECT s.song_id, s.song_name, s.duration, s.song_genre, s.song_release_year " +
                          "FROM song_table s " +
                          "JOIN song_playlist sp ON s.song_id = sp.song_id " +
                          "WHERE sp.playlist_id = ?";
@@ -921,17 +928,16 @@ public class Manage {
             
             System.out.println("Songs in the playlist:");
             System.out.println("=".repeat(150));
-            System.out.printf("%-10s %-30s %-10s %-15s %-10s %-5s%n", 
-                              "ID", "Title", "Duration", "Genre", "Replays", "Year");
+            System.out.printf("%-10s %-30s %-10s %-15s %-5s%n", 
+                              "ID", "Title", "Duration", "Genre", "Year");
             System.out.println("=".repeat(150));
 
             while (rs.next()) {         	
-                System.out.printf("%-10d %-30s %-10d %-15s %-10d %-5d%n", 
+                System.out.printf("%-10d %-30s %-10d %-15s %-5d%n", 
                         rs.getInt("song_id"), 
                         rs.getString("song_name"), 
                         rs.getInt("duration"), 
                         rs.getString("song_genre"), 
-                        rs.getInt("replays"), 
                         rs.getInt("song_release_year"));
             }
 
@@ -943,7 +949,11 @@ public class Manage {
     }
        
     public void removeSongFromPlaylist(int userId, Scanner s) {
-        printUserPlaylists(userId);
+    	
+    	if (!printUserPlaylists(userId)) {
+        	System.out.print("You have no playlists\n");
+        	return;
+        }
 
         System.out.print("Enter the ID of the playlist to manage songs: ");
         int playlistId = s.nextInt();
@@ -989,20 +999,6 @@ public class Manage {
         }
 
         try {
-
-            // Check if the user has already written a review
-            String checkReviewSQL = "SELECT COUNT(*) FROM app_review_table WHERE user_id = ?";
-            pstmt = conn.prepareStatement(checkReviewSQL);
-            pstmt.setInt(1, userId);
-            ResultSet rs = pstmt.executeQuery();
-            rs.next();
-            int reviewCount = rs.getInt(1);
-
-            if (reviewCount > 0) {
-                System.out.println("User has already written a review.");
-                return;
-            }
-
             // Insert the new review
             String sql = "INSERT INTO app_review_table (app_rating, review_text, review_date, user_id) VALUES (?, ?, NOW(), ?)";
             pstmt = conn.prepareStatement(sql);
@@ -1013,9 +1009,14 @@ public class Manage {
             System.out.println("Thank you for your feedback!");
 
         } catch (SQLException ex) {
+        	if (ex.getSQLState().equals("23505"))
+        	{
+        		System.out.println("You already wrote a review\n");
+        	} else {
             System.out.println("SQLException: " + ex.getMessage());
             System.out.println("SQLState: " + ex.getSQLState());
             System.out.println("VendorError: " + ex.getErrorCode());
+        	}
         }
     }
     
