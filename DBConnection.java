@@ -13,7 +13,7 @@ public class DBConnection {
 	
 	// Database connection parameters
     static final String JDBC_DRIVER = "org.postgresql.Driver";
-    static final String DB_URL = "jdbc:postgresql://localhost:5432/afekafy";
+    static final String DB_URL = "jdbc:postgresql://localhost:5432/Afekafy";
     static final String USER = "postgresuser";
     static final String PASS = "postgres";
     Connection conn = null;

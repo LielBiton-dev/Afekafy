@@ -329,7 +329,9 @@ public class Manage {
     }
     
     public int selectAlbum(int userId, Scanner s) {
-        printArtistAlbums(userId);
+        if (!printArtistAlbums(userId)) {
+        	return -1;
+        }
         
         System.out.println("Select the album to add songs to by entering its id number:");
         int choice = s.nextInt();
@@ -349,6 +351,12 @@ public class Manage {
         }
         
         int albumID = selectAlbum(artistID, s);
+        
+        if (albumID == -1) {
+        	System.out.println("You have no albums");
+        	return;
+        }
+        
         System.out.print("How many songs do you want to add to this album? ");
         int numberOfSongs = s.nextInt();
         s.nextLine();
@@ -544,14 +552,14 @@ public class Manage {
 		}
     }
     
-    public void printArtistAlbums(int userId) {
+    public boolean printArtistAlbums(int userId) {
         if (!isArtist(userId)) {
             System.out.println("Only artists can view their albums.");
-            return;
+            return false;
         }
-
-        try {
-            
+        
+        boolean exists = false;
+        try { 
             String sql = "SELECT * FROM album_table WHERE artist_id = ?";
             pstmt = conn.prepareStatement(sql); 
             pstmt.setInt(1, userId);
@@ -563,16 +571,20 @@ public class Manage {
             System.out.println("=".repeat(55)); 
 
             while (rs.next()) {
+            	exists = true;
                 Album album = new Album(rs.getString("album_name"), rs.getInt("album_release_year"), rs.getString("album_genre"));
                 int albumId = rs.getInt("album_id");              
                 System.out.printf("%-10d %-15s %-10s %-10d%n", albumId, album.albumTitle, album.genre.toString(), album.releasedYear);
             }
+                
 
         } catch (SQLException ex) {
 			System.out.println("SQLException: " + ex.getMessage());
 			System.out.println("SQLState: " + ex.getSQLState());
 			System.out.println("VendorError: " + ex.getErrorCode());
 		}
+        
+        return exists;
     }
     
     public void playSong(int songId, int userId) {
@@ -709,9 +721,7 @@ public class Manage {
         System.out.println("3: Add song to a playlist");
         System.out.print("Choose an action: ");
         int action = s.nextInt();
-        s.nextLine();
-        
-        
+        s.nextLine();      
 
         switch (action) {
             case 1:
@@ -835,7 +845,10 @@ public class Manage {
     }
     
     public void choosePlaylistAndAddSong(int songId, int userId, Scanner s) {
-        printUserPlaylists(userId);
+    	if (!printUserPlaylists(userId)) {
+        	System.out.print("You have no playlists\n");
+        	return;
+        }
 
         System.out.print("Enter the ID of the playlist you want to add the song to: ");
         int playlistId = s.nextInt();
