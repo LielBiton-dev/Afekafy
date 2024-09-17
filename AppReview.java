@@ -10,7 +10,7 @@ public class AppReview {
 	
 	public AppReview(String text, int rate) {
 		this.reviewTxt = text;
-		this.rate = rate; // Rate needs to be between 1->5, where this condition is being checked? 
+		this.rate = rate; 
 		reviewDate = LocalDate.now();
 	}
 

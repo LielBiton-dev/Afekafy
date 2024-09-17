@@ -22,6 +22,7 @@ public class User {
         this.lastName = lastName;
         this.yearOfBirth = yearOfBirth;
         this.password = password;
+        this.email = email;
     	setEmail(email);
     }
     

@@ -2,7 +2,6 @@ package afekafy;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
-import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -11,23 +10,20 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 public class DBConnection {
-
+	
 	// Database connection parameters
     static final String JDBC_DRIVER = "org.postgresql.Driver";
-    static final String DB_URL = "jdbc:postgresql://localhost:5432/afekafy";
+    static final String DB_URL = "jdbc:postgresql://localhost:5432/Afekafy";
     static final String USER = "postgresuser";
     static final String PASS = "postgres";
     Connection conn = null;
-    //Statement stmt = null;
-    PreparedStatement pstmt = null;
     ResultSet rs = null;
     
     // Method to connect to the database
-    public void connect(){
+    public Connection connect(){
         try {
             Class.forName(JDBC_DRIVER);
             conn = DriverManager.getConnection(DB_URL, USER, PASS);
-            //stmt = conn.createStatement();
         } catch (SQLException ex) {
 			System.out.println("SQLException: " + ex.getMessage());
 			System.out.println("SQLState: " + ex.getSQLState());
@@ -35,13 +31,14 @@ public class DBConnection {
 		} catch (ClassNotFoundException ex) {
 			ex.printStackTrace();
 		}
+        
+        return conn;
     }
     
     // Method to close the database resources
     public void closeDBresources() {
         try {
             if (rs != null) rs.close();
-            //if (stmt != null) stmt.close();
             if (conn != null) conn.close();
         } catch (SQLException e) {
             e.printStackTrace();
@@ -56,7 +53,7 @@ public class DBConnection {
         }
         Statement stmt = null;
         try {
-            stmt = conn.createStatement(); // Create a new Statement for each query
+            stmt = conn.createStatement();
             return stmt.executeQuery(sqlQuery);
         } catch (SQLException ex) {
             System.out.println("SQLException: " + ex.getMessage());
@@ -66,7 +63,7 @@ public class DBConnection {
         }
     }
     
- // Method to execute a SQL query and return the results in a Map
+    // Method to execute a SQL query and return the results in a Map
     public Map<String, Object> executeMultipleQueries(String sqlQuery) {
     	Map<String, Object> resultMap = new LinkedHashMap<>();
         try {
@@ -102,8 +99,8 @@ public class DBConnection {
         }
         Statement stmt = null;
         try {
-            stmt = conn.createStatement(); // Create a new Statement for each query
-            return stmt.executeUpdate(sqlQuery); // Executes the SQL statement
+            stmt = conn.createStatement();
+            return stmt.executeUpdate(sqlQuery);
         } catch (SQLException ex) {
             System.out.println("SQLException: " + ex.getMessage());
             System.out.println("SQLState: " + ex.getSQLState());
@@ -119,4 +116,5 @@ public class DBConnection {
             }
         }
     }
+
 }
